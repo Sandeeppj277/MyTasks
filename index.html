@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyGoals</title>
   <link rel="icon" type="image/jpeg" href="logo.jpg" />
+  <link rel="apple-touch-icon" href="logo.jpg" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffced8" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MyGoals" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -86,5 +92,14 @@
 
   <script src="js/storage.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('ServiceWorker registration error:', err);
+        });
+      });
+    }
+  </script>
 </body>
 </html>

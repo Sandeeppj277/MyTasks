@@ -1,0 +1,23 @@
+{
+  "name": "MyGoals",
+  "short_name": "MyGoals",
+  "description": "Personal Goals & Accomplishments Tracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff4de",
+  "theme_color": "#ffced8",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

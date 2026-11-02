@@ -1,75 +1,27 @@
 /**
- * storage.js — Persistent Storage Layer for Goals & Tasks
+ * storage.js — Storage for MyGoals
  */
 
-const GOALS_KEY = 'mygoals_data';
-const TASKS_KEY = 'mytasks_data';
+const STORAGE_KEY = 'mygoals_items';
 
 const Storage = {
-  // ─── Goals ───────────────────────────────
-  loadGoals() {
+  load() {
     try {
-      const raw = localStorage.getItem(GOALS_KEY);
-      if (!raw) {
-        // Default initial goal
-        const defaultGoals = [
-          { id: 'goal_main', title: 'Personal Goals', createdAt: new Date().toISOString() }
-        ];
-        this.saveGoals(defaultGoals);
-        return defaultGoals;
-      }
-      const data = JSON.parse(raw);
-      return Array.isArray(data) && data.length > 0 ? data : [
-        { id: 'goal_main', title: 'Personal Goals', createdAt: new Date().toISOString() }
-      ];
-    } catch (e) {
-      console.error('Failed to load goals:', e);
-      return [{ id: 'goal_main', title: 'Personal Goals', createdAt: new Date().toISOString() }];
-    }
-  },
-
-  saveGoals(goals) {
-    try {
-      localStorage.setItem(GOALS_KEY, JSON.stringify(goals));
-    } catch (e) {
-      console.error('Failed to save goals:', e);
-    }
-  },
-
-  // ─── Tasks ───────────────────────────────
-  loadTasks() {
-    try {
-      const raw = localStorage.getItem(TASKS_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('mytasks_data');
       if (!raw) return [];
       const data = JSON.parse(raw);
-      if (!Array.isArray(data)) return [];
-
-      // Auto-migrate any tasks that lack a goalId
-      const goals = this.loadGoals();
-      const defaultGoalId = goals[0]?.id || 'goal_main';
-      return data.map(t => ({
-        ...t,
-        goalId: t.goalId || defaultGoalId
-      }));
+      return Array.isArray(data) ? data : [];
     } catch (e) {
-      console.error('Failed to load tasks:', e);
+      console.error('Failed to load goals:', e);
       return [];
     }
   },
 
-  saveTasks(tasks) {
+  save(items) {
     try {
-      localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
-      console.error('Failed to save tasks:', e);
+      console.error('Failed to save goals:', e);
     }
-  },
-
-  // Backward compatibility alias
-  load() {
-    return this.loadTasks();
-  },
-  save(tasks) {
-    return this.saveTasks(tasks);
   }
 };

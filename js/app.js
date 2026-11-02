@@ -1,39 +1,49 @@
 /**
- * app.js — Goals & Tasks Management
+ * app.js — MyGoals Single Page Logic
  */
 
 (function () {
   'use strict';
 
-  let goals = Storage.loadGoals();
-  let tasks = Storage.loadTasks();
+  let goals = Storage.load();
   let activeFilter = 'all'; // all | pending | completed
 
-  const goalsContainer  = document.getElementById('goalsContainer');
+  const goalInput       = document.getElementById('goalInput');
+  const addGoalForm     = document.getElementById('addGoalForm');
+  const goalsListEl     = document.getElementById('goalsList');
   const emptyStateEl    = document.getElementById('emptyState');
   const progressFill    = document.getElementById('progressFill');
   const progressPercent = document.getElementById('progressPercent');
-  const progressDetail  = document.getElementById('progressDetail');
-  const toastContainer  = document.getElementById('toastContainer');
+  const progressSummary = document.getElementById('progressSummary');
   const badgeAll        = document.getElementById('badgeAll');
   const badgePending    = document.getElementById('badgePending');
   const badgeCompleted  = document.getElementById('badgeCompleted');
-  const navBadge        = document.getElementById('navBadge');
-  const clearBtn        = document.getElementById('clearCompleted');
-  const footerEl        = document.getElementById('footer');
+  const currentDateEl   = document.getElementById('currentDate');
+  const footerBar       = document.getElementById('footerBar');
+  const clearBtn        = document.getElementById('clearCompletedBtn');
+  const toastContainer  = document.getElementById('toastContainer');
 
   const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   function formatDate(iso) {
-    return new Date(iso).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   }
 
   function escapeHtml(str) {
-    const d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function setDate() {
+    const now = new Date();
+    currentDateEl.textContent = now.toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric'
+    });
   }
 
   function toast(msg, type = 'info') {
@@ -47,178 +57,105 @@
     }, 2200);
   }
 
-  function filterTasks(list) {
-    if (activeFilter === 'pending')   return list.filter(t => !t.completed);
-    if (activeFilter === 'completed') return list.filter(t =>  t.completed);
-    return list;
+  function getFilteredGoals() {
+    if (activeFilter === 'pending')   return goals.filter(g => !g.completed);
+    if (activeFilter === 'completed') return goals.filter(g => g.completed);
+    return goals;
   }
 
   function render() {
-    goalsContainer.innerHTML = '';
+    const filtered = getFilteredGoals();
+    goalsListEl.innerHTML = '';
 
-    const allFilteredTasks = filterTasks(tasks);
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(t => t.completed).length;
-    const pendingTasks = totalTasks - completedTasks;
-
-    // Badges & Overall Progress
-    badgeAll.textContent       = totalTasks;
-    badgePending.textContent   = pendingTasks;
-    badgeCompleted.textContent = completedTasks;
-    navBadge.textContent       = pendingTasks;
-
-    const overallPct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
-    progressFill.style.width    = overallPct + '%';
-    progressPercent.textContent = overallPct + '%';
-    progressDetail.textContent  = `${completedTasks} of ${totalTasks} tasks completed across all goals`;
-
-    footerEl.style.display = completedTasks > 0 ? 'flex' : 'none';
-
-    if (goals.length === 0 || allFilteredTasks.length === 0) {
+    if (filtered.length === 0) {
       emptyStateEl.style.display = 'block';
     } else {
       emptyStateEl.style.display = 'none';
+      filtered.forEach(goal => {
+        goalsListEl.appendChild(createGoalElement(goal));
+      });
     }
 
-    // Render each Goal card
-    goals.forEach(goal => {
-      const goalTasks = tasks.filter(t => t.goalId === goal.id);
-      const filteredGoalTasks = filterTasks(goalTasks);
+    // Progress & counts
+    const total = goals.length;
+    const completed = goals.filter(g => g.completed).length;
+    const pending = total - completed;
+    const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
 
-      // In filter mode, if this goal has no matching tasks, only show if activeFilter is 'all'
-      if (filteredGoalTasks.length === 0 && activeFilter !== 'all') {
-        return;
-      }
+    progressFill.style.width = pct + '%';
+    progressPercent.textContent = pct + '%';
+    progressSummary.textContent = `${completed} of ${total} goals completed`;
 
-      const goalTotal = goalTasks.length;
-      const goalDone  = goalTasks.filter(t => t.completed).length;
-      const goalPct   = goalTotal === 0 ? 0 : Math.round((goalDone / goalTotal) * 100);
+    badgeAll.textContent = total;
+    badgePending.textContent = pending;
+    badgeCompleted.textContent = completed;
 
-      const goalCard = document.createElement('div');
-      goalCard.className = 'goal-card';
-      goalCard.dataset.goalId = goal.id;
-
-      goalCard.innerHTML = `
-        <div class="goal-header">
-          <div class="goal-title-wrap">
-            <span class="goal-badge">🎯 Goal</span>
-            <h3 class="goal-title">${escapeHtml(goal.title)}</h3>
-          </div>
-          <div class="goal-header-right">
-            <span class="goal-progress-pill">${goalDone}/${goalTotal} done (${goalPct}%)</span>
-            <button class="btn-delete-goal" title="Delete this goal and its tasks">✕</button>
-          </div>
-        </div>
-
-        <div class="goal-progress-bar">
-          <div class="goal-progress-fill" style="width: ${goalPct}%"></div>
-        </div>
-
-        <!-- Task List inside Goal -->
-        <div class="goal-task-list"></div>
-
-        <!-- Quick Add Task inline to this Goal -->
-        <form class="quick-add-task-form">
-          <input
-            type="text"
-            class="input-quick-add"
-            placeholder="+ Add task to this goal..."
-            autocomplete="off"
-            required
-          />
-          <button type="submit" class="btn-quick-add">Add</button>
-        </form>
-      `;
-
-      // Render tasks inside this goal
-      const taskListEl = goalCard.querySelector('.goal-task-list');
-      if (filteredGoalTasks.length === 0) {
-        const noTasks = document.createElement('div');
-        noTasks.className = 'goal-no-tasks';
-        noTasks.textContent = activeFilter === 'all' ? 'No tasks yet for this goal.' : 'No tasks match filter.';
-        taskListEl.appendChild(noTasks);
-      } else {
-        filteredGoalTasks.forEach(task => {
-          taskListEl.appendChild(createTaskElement(task));
-        });
-      }
-
-      // Quick add task listener
-      const quickForm = goalCard.querySelector('.quick-add-task-form');
-      const quickInput = goalCard.querySelector('.input-quick-add');
-      quickForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const text = quickInput.value.trim();
-        if (!text) return;
-
-        tasks.unshift({
-          id: genId(),
-          goalId: goal.id,
-          text: text,
-          completed: false,
-          createdAt: new Date().toISOString()
-        });
-        Storage.saveTasks(tasks);
-        render();
-        toast('Task added to goal!', 'success');
-      });
-
-      // Delete goal listener
-      const delGoalBtn = goalCard.querySelector('.btn-delete-goal');
-      delGoalBtn.addEventListener('click', () => {
-        if (confirm(`Delete the goal "${goal.title}" and its ${goalTotal} tasks?`)) {
-          goals = goals.filter(g => g.id !== goal.id);
-          tasks = tasks.filter(t => t.goalId !== goal.id);
-          Storage.saveGoals(goals);
-          Storage.saveTasks(tasks);
-          render();
-          toast('Goal deleted', 'error');
-        }
-      });
-
-      goalsContainer.appendChild(goalCard);
-    });
+    footerBar.style.display = completed > 0 ? 'flex' : 'none';
   }
 
-  function createTaskElement(task) {
+  function createGoalElement(goal) {
     const el = document.createElement('div');
-    el.className = `task-item${task.completed ? ' completed' : ''}`;
+    el.className = `goal-row${goal.completed ? ' completed' : ''}`;
+    el.dataset.id = goal.id;
+
     el.innerHTML = `
-      <label class="task-checkbox">
-        <input type="checkbox" ${task.completed ? 'checked' : ''} />
+      <label class="goal-checkbox">
+        <input type="checkbox" ${goal.completed ? 'checked' : ''} aria-label="Mark goal complete" />
         <span class="checkmark"></span>
       </label>
-      <div class="task-content">
-        <p class="task-text">${escapeHtml(task.text)}</p>
-        <span class="task-date">${formatDate(task.createdAt)}</span>
+      <div class="goal-details">
+        <p class="goal-text">${escapeHtml(goal.text)}</p>
+        <span class="goal-date">${formatDate(goal.createdAt)}</span>
       </div>
-      <button class="btn-delete" title="Delete Task">🗑️</button>
+      <button class="btn-delete" title="Delete goal" aria-label="Delete goal">🗑️</button>
     `;
 
-    // Toggle complete
-    el.querySelector('input').addEventListener('change', () => {
-      task.completed = !task.completed;
-      task.completedAt = task.completed ? new Date().toISOString() : null;
-      Storage.saveTasks(tasks);
+    // Checkbox toggle
+    const checkbox = el.querySelector('input[type="checkbox"]');
+    checkbox.addEventListener('change', () => {
+      goal.completed = !goal.completed;
+      goal.completedAt = goal.completed ? new Date().toISOString() : null;
+      Storage.save(goals);
       render();
-      toast(task.completed ? 'Task completed! 🎉' : 'Task marked pending', task.completed ? 'success' : 'info');
+      toast(goal.completed ? 'Goal completed! 🎉' : 'Goal marked pending', goal.completed ? 'success' : 'info');
     });
 
-    // Delete task
-    el.querySelector('.btn-delete').addEventListener('click', () => {
+    // Delete
+    const delBtn = el.querySelector('.btn-delete');
+    delBtn.addEventListener('click', () => {
       el.classList.add('removing');
       el.addEventListener('animationend', () => {
-        tasks = tasks.filter(t => t.id !== task.id);
-        Storage.saveTasks(tasks);
+        goals = goals.filter(g => g.id !== goal.id);
+        Storage.save(goals);
         render();
-        toast('Task removed', 'error');
+        toast('Goal removed', 'error');
       });
     });
 
     return el;
   }
 
-  // Filter Buttons
+  // Add goal submit
+  addGoalForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = goalInput.value.trim();
+    if (!text) return;
+
+    goals.unshift({
+      id: genId(),
+      text: text,
+      completed: false,
+      createdAt: new Date().toISOString()
+    });
+
+    Storage.save(goals);
+    goalInput.value = '';
+    render();
+    toast('Goal added!', 'success');
+    goalInput.focus();
+  });
+
+  // Filters
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -228,15 +165,16 @@
     });
   });
 
-  // Clear completed tasks
+  // Clear completed
   clearBtn.addEventListener('click', () => {
-    const count = tasks.filter(t => t.completed).length;
+    const count = goals.filter(g => g.completed).length;
     if (count === 0) return;
-    tasks = tasks.filter(t => !t.completed);
-    Storage.saveTasks(tasks);
+    goals = goals.filter(g => !g.completed);
+    Storage.save(goals);
     render();
-    toast(`Cleared ${count} completed task${count > 1 ? 's' : ''}`, 'success');
+    toast(`Cleared ${count} completed goal${count > 1 ? 's' : ''}`, 'success');
   });
 
+  setDate();
   render();
 })();

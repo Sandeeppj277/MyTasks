@@ -3,211 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyTasks — Add Goal & Task</title>
+  <title>MyGoals</title>
   <link rel="icon" type="image/jpeg" href="logo.jpg" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <div class="app">
-    <!-- Nav -->
-    <nav class="nav">
-      <div class="logo">
-        <img src="logo.jpg" alt="Logo" class="logo-img" />
-        <h1>MyTasks</h1>
+  <main class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <img src="logo.jpg" alt="Logo" class="brand-logo" />
+        <div>
+          <h1 class="brand-title">MyGoals</h1>
+          <p class="current-date" id="currentDate"></p>
+        </div>
       </div>
-      <div class="nav-links">
-        <a href="index.html" class="nav-link active">Add Tasks</a>
-        <a href="tasks.html" class="nav-link">My Goals & Tasks <span class="nav-badge" id="navBadge">0</span></a>
+
+      <!-- Progress Tracker -->
+      <div class="progress-card">
+        <div class="progress-info">
+          <span class="progress-label">Goal Progress</span>
+          <span class="progress-percent" id="progressPercent">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <p class="progress-summary" id="progressSummary">0 of 0 goals completed</p>
       </div>
+    </header>
+
+    <!-- Add Goal Input -->
+    <form class="add-goal-form" id="addGoalForm">
+      <input
+        type="text"
+        id="goalInput"
+        class="goal-input"
+        placeholder="Enter a goal you want to achieve..."
+        autocomplete="off"
+        required
+      />
+      <button type="submit" class="btn-add">
+        <span class="btn-plus">+</span> Add Goal
+      </button>
+    </form>
+
+    <!-- Filters -->
+    <nav class="filter-tabs">
+      <button class="filter-btn active" data-filter="all">
+        All <span class="badge" id="badgeAll">0</span>
+      </button>
+      <button class="filter-btn" data-filter="pending">
+        Pending <span class="badge" id="badgePending">0</span>
+      </button>
+      <button class="filter-btn" data-filter="completed">
+        Completed <span class="badge" id="badgeCompleted">0</span>
+      </button>
     </nav>
 
-    <!-- Add Task Section -->
-    <div class="add-section">
-      <h2 class="page-title">Tasks for Your Goals</h2>
-      <p class="page-subtitle">Organize actionable tasks under your personal goals</p>
+    <!-- Single Continuous Goals List -->
+    <div class="goals-list" id="goalsList"></div>
 
-      <form class="add-form" id="addTaskForm">
-        <!-- Goal Selection / Creation -->
-        <div class="form-group">
-          <label class="field-label" for="goalSelect">Select Goal</label>
-          <div class="goal-select-row">
-            <select id="goalSelect" class="goal-select" required></select>
-            <button type="button" class="btn-toggle-new-goal" id="btnToggleNewGoal" title="Create a new goal">+ New Goal</button>
-          </div>
-        </div>
-
-        <!-- Inline New Goal Input (Toggled) -->
-        <div class="new-goal-box" id="newGoalBox" style="display: none;">
-          <label class="field-label" for="newGoalTitle">New Goal Name</label>
-          <div class="new-goal-row">
-            <input
-              type="text"
-              id="newGoalTitle"
-              class="input-main small"
-              placeholder="e.g. Master Machine Learning, Fitness 2026..."
-              autocomplete="off"
-            />
-            <button type="button" class="btn-save-goal" id="btnSaveGoal">Save Goal</button>
-          </div>
-        </div>
-
-        <!-- Task Input -->
-        <div class="form-group">
-          <label class="field-label" for="taskInput">Task to Perform</label>
-          <input
-            type="text"
-            id="taskInput"
-            class="input-main"
-            placeholder="What actionable task will you do?"
-            required
-            autocomplete="off"
-          />
-        </div>
-
-        <button type="submit" class="btn-add">
-          <span class="btn-icon">+</span> Add Task to Goal
-        </button>
-      </form>
-
-      <!-- Recently Added -->
-      <div class="recent-section" id="recentSection" style="display: none">
-        <h3 class="recent-title">Just Added</h3>
-        <div class="recent-list" id="recentList"></div>
-      </div>
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <div class="empty-icon">🎯</div>
+      <h3>No goals yet</h3>
+      <p>Type your goal above and press Enter or click Add Goal.</p>
     </div>
 
-    <a href="tasks.html" class="btn-go" id="goToTasks" style="display: none">
-      View All Goals & Tasks →
-    </a>
-  </div>
+    <!-- Footer Actions -->
+    <footer class="footer-bar" id="footerBar" style="display: none;">
+      <button type="button" class="btn-clear" id="clearCompletedBtn">
+        Clear completed goals
+      </button>
+    </footer>
+  </main>
 
-  <!-- Toast -->
+  <!-- Toast Notifications -->
   <div class="toast-container" id="toastContainer"></div>
 
   <script src="js/storage.js"></script>
-  <script>
-    (function () {
-      const form = document.getElementById('addTaskForm');
-      const taskInput = document.getElementById('taskInput');
-      const goalSelect = document.getElementById('goalSelect');
-      const btnToggleNewGoal = document.getElementById('btnToggleNewGoal');
-      const newGoalBox = document.getElementById('newGoalBox');
-      const newGoalTitle = document.getElementById('newGoalTitle');
-      const btnSaveGoal = document.getElementById('btnSaveGoal');
-      const recentSection = document.getElementById('recentSection');
-      const recentList = document.getElementById('recentList');
-      const navBadge = document.getElementById('navBadge');
-      const goBtn = document.getElementById('goToTasks');
-      const toastContainer = document.getElementById('toastContainer');
-
-      const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-
-      function toast(msg, type = 'success') {
-        const el = document.createElement('div');
-        el.className = `toast ${type}`;
-        el.textContent = msg;
-        toastContainer.appendChild(el);
-        setTimeout(() => {
-          el.classList.add('hiding');
-          el.addEventListener('animationend', () => el.remove());
-        }, 2200);
-      }
-
-      function populateGoals(selectGoalId) {
-        const goals = Storage.loadGoals();
-        goalSelect.innerHTML = '';
-        goals.forEach(g => {
-          const opt = document.createElement('option');
-          opt.value = g.id;
-          opt.textContent = '🎯 ' + g.title;
-          goalSelect.appendChild(opt);
-        });
-
-        if (selectGoalId) {
-          goalSelect.value = selectGoalId;
-        }
-      }
-
-      function updateBadge() {
-        const tasks = Storage.loadTasks();
-        const pending = tasks.filter(t => !t.completed).length;
-        navBadge.textContent = pending;
-        goBtn.style.display = tasks.length > 0 ? 'flex' : 'none';
-      }
-
-      function addRecent(taskText, goalTitle) {
-        recentSection.style.display = 'block';
-        const el = document.createElement('div');
-        el.className = 'recent-item';
-        el.innerHTML = `<span>${taskText}</span> <span class="recent-goal-tag">${goalTitle}</span>`;
-        recentList.prepend(el);
-        while (recentList.children.length > 5) {
-          recentList.removeChild(recentList.lastChild);
-        }
-      }
-
-      // Toggle new goal box
-      btnToggleNewGoal.addEventListener('click', () => {
-        const isHidden = newGoalBox.style.display === 'none';
-        newGoalBox.style.display = isHidden ? 'block' : 'none';
-        btnToggleNewGoal.textContent = isHidden ? '✕ Cancel' : '+ New Goal';
-        if (isHidden) newGoalTitle.focus();
-      });
-
-      // Save new goal
-      btnSaveGoal.addEventListener('click', () => {
-        const title = newGoalTitle.value.trim();
-        if (!title) return;
-        const goals = Storage.loadGoals();
-        const newGoal = {
-          id: 'goal_' + genId(),
-          title: title,
-          createdAt: new Date().toISOString()
-        };
-        goals.push(newGoal);
-        Storage.saveGoals(goals);
-
-        populateGoals(newGoal.id);
-        newGoalTitle.value = '';
-        newGoalBox.style.display = 'none';
-        btnToggleNewGoal.textContent = '+ New Goal';
-        toast(`Goal "${title}" created!`);
-      });
-
-      // Submit Task
-      form.addEventListener('submit', e => {
-        e.preventDefault();
-        const text = taskInput.value.trim();
-        const goalId = goalSelect.value;
-        if (!text || !goalId) return;
-
-        const tasks = Storage.loadTasks();
-        const newTask = {
-          id: genId(),
-          goalId: goalId,
-          text: text,
-          completed: false,
-          createdAt: new Date().toISOString()
-        };
-        tasks.unshift(newTask);
-        Storage.saveTasks(tasks);
-
-        const goals = Storage.loadGoals();
-        const goal = goals.find(g => g.id === goalId);
-        addRecent(text, goal ? goal.title : 'Goal');
-
-        updateBadge();
-        toast('Task added to goal!');
-        taskInput.value = '';
-        taskInput.focus();
-      });
-
-      populateGoals();
-      updateBadge();
-    })();
-  </script>
+  <script src="js/app.js"></script>
 </body>
 </html>

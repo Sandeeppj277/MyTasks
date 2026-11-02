@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyTasks — Add</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpg" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app">
+    <!-- Nav -->
+    <nav class="nav">
+      <div class="logo">
+        <img src="logo.jpg" alt="Logo" class="logo-img" />
+        <h1>MyTasks</h1>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active">Add Task</a>
+        <a href="tasks.html" class="nav-link">My Tasks <span class="nav-badge" id="navBadge">0</span></a>
+      </div>
+    </nav>
+
+    <!-- Add Task Section -->
+    <div class="add-section">
+      <h2 class="page-title">Add a New Task</h2>
+      <p class="page-subtitle">What do you need to get done?</p>
+
+      <form class="add-form" id="addTaskForm">
+        <input
+          type="text"
+          id="taskInput"
+          class="input-main"
+          placeholder="Enter your task..."
+          required
+          autocomplete="off"
+        />
+        <button type="submit" class="btn-add">
+          <span class="btn-icon">+</span> Add Task
+        </button>
+      </form>
+
+      <!-- Recently Added -->
+      <div class="recent-section" id="recentSection" style="display: none">
+        <h3 class="recent-title">Just added</h3>
+        <div class="recent-list" id="recentList"></div>
+      </div>
+    </div>
+
+    <a href="tasks.html" class="btn-go" id="goToTasks" style="display: none">
+      Go to My Tasks →
+    </a>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    (function () {
+      const tasks = Storage.load();
+      const form = document.getElementById('addTaskForm');
+      const input = document.getElementById('taskInput');
+      const recentSection = document.getElementById('recentSection');
+      const recentList = document.getElementById('recentList');
+      const navBadge = document.getElementById('navBadge');
+      const goBtn = document.getElementById('goToTasks');
+      const toastContainer = document.getElementById('toastContainer');
+
+      const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+      function updateBadge() {
+        const all = Storage.load();
+        const pending = all.filter(t => !t.completed).length;
+        navBadge.textContent = pending;
+        goBtn.style.display = all.length > 0 ? 'flex' : 'none';
+      }
+
+      function toast(msg) {
+        const el = document.createElement('div');
+        el.className = 'toast success';
+        el.textContent = msg;
+        toastContainer.appendChild(el);
+        setTimeout(() => {
+          el.classList.add('hiding');
+          el.addEventListener('animationend', () => el.remove());
+        }, 2000);
+      }
+
+      function addRecent(text) {
+        recentSection.style.display = 'block';
+        const el = document.createElement('div');
+        el.className = 'recent-item';
+        el.textContent = text;
+        recentList.prepend(el);
+        // Keep only last 5
+        while (recentList.children.length > 5) {
+          recentList.removeChild(recentList.lastChild);
+        }
+      }
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+
+        const all = Storage.load();
+        all.unshift({
+          id: genId(),
+          text,
+          completed: false,
+          createdAt: new Date().toISOString(),
+        });
+        Storage.save(all);
+
+        addRecent(text);
+        updateBadge();
+        toast('Task added!');
+        input.value = '';
+        input.focus();
+      });
+
+      updateBadge();
+    })();
+  </script>
+</body>
+</html>

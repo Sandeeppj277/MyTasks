@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MyTasks — My Tasks</title>
+  <title>MyTasks — My Goals & Tasks</title>
   <link rel="icon" type="image/jpeg" href="logo.jpg" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,27 +19,27 @@
         <h1>MyTasks</h1>
       </div>
       <div class="nav-links">
-        <a href="index.html" class="nav-link">Add Task</a>
-        <a href="tasks.html" class="nav-link active">My Tasks <span class="nav-badge" id="navBadge">0</span></a>
+        <a href="index.html" class="nav-link">Add Tasks</a>
+        <a href="tasks.html" class="nav-link active">My Goals & Tasks <span class="nav-badge" id="navBadge">0</span></a>
       </div>
     </nav>
 
-    <!-- Progress -->
+    <!-- Overall Progress -->
     <div class="progress-card">
       <div class="progress-info">
-        <span class="progress-label">Progress</span>
+        <span class="progress-label">Overall Goals Progress</span>
         <span class="progress-value" id="progressPercent">0%</span>
       </div>
       <div class="progress-bar">
         <div class="progress-fill" id="progressFill" style="width: 0%"></div>
       </div>
-      <p class="progress-detail" id="progressDetail">0 of 0 tasks done</p>
+      <p class="progress-detail" id="progressDetail">0 of 0 tasks completed across all goals</p>
     </div>
 
     <!-- Filters -->
     <div class="filters">
       <button class="filter-btn active" data-filter="all">
-        All <span class="badge" id="badgeAll">0</span>
+        All Tasks <span class="badge" id="badgeAll">0</span>
       </button>
       <button class="filter-btn" data-filter="pending">
         Pending <span class="badge" id="badgePending">0</span>
@@ -49,19 +49,19 @@
       </button>
     </div>
 
-    <!-- Task List -->
-    <div class="task-list" id="taskList"></div>
+    <!-- Goals & Tasks Container -->
+    <div class="goals-container" id="goalsContainer"></div>
 
     <!-- Empty State -->
     <div class="empty-state" id="emptyState" style="display: none">
-      <div class="empty-icon">📝</div>
-      <h3>No tasks here</h3>
-      <p>Go to <a href="index.html" style="color: var(--accent)">Add Task</a> to create some.</p>
+      <div class="empty-icon">🎯</div>
+      <h3>No tasks found</h3>
+      <p>Go to <a href="index.html" style="color: var(--accent-dark); font-weight: 600;">Add Tasks</a> to add tasks to your goals.</p>
     </div>
 
     <!-- Footer -->
     <div class="footer" id="footer" style="display: none">
-      <button class="btn-clear" id="clearCompleted">Clear completed</button>
+      <button class="btn-clear" id="clearCompleted">Clear All Completed Tasks</button>
     </div>
   </div>
 

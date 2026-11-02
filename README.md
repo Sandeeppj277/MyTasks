@@ -30,7 +30,7 @@ Run a local server:
 python -m http.server 3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Live link : https://sandeeppj277.github.io/MyTasks/
 
 ---
 

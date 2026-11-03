@@ -17,15 +17,78 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <main class="app-container">
+  <!-- Security Lock Screen -->
+  <section class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <img src="logo.jpg" alt="Logo" class="auth-logo" />
+      <h1 class="auth-title">MyGoals</h1>
+      <p class="auth-subtitle">Enter your credentials to access your goals</p>
+
+      <form class="auth-form" id="authForm">
+        <div class="auth-field">
+          <label for="authUsername" class="auth-label">Username</label>
+          <input
+            type="text"
+            id="authUsername"
+            class="auth-input"
+            placeholder="Enter username"
+            value="sandeep"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="auth-field">
+          <label for="authPassword" class="auth-label">Password / PIN</label>
+          <div class="password-input-wrap">
+            <input
+              type="password"
+              id="authPassword"
+              class="auth-input"
+              placeholder="Enter PIN (e.g. 5000)"
+              pattern="[0-9]*"
+              inputmode="numeric"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="btn-toggle-pwd" id="btnTogglePwd" aria-label="Toggle password visibility">👁️</button>
+          </div>
+        </div>
+
+        <div class="auth-remember">
+          <label class="remember-label">
+            <input type="checkbox" id="rememberMe" checked />
+            <span class="custom-checkbox"></span>
+            Keep me logged in on this device
+          </label>
+        </div>
+
+        <div class="auth-error" id="authError" style="display: none;">
+          Incorrect password. Please try again.
+        </div>
+
+        <button type="submit" class="btn-unlock">
+          <span>🔓</span> Unlock MyGoals
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Main Application Container (Protected) -->
+  <main class="app-container" id="appContainer" style="display: none;">
     <!-- Header -->
     <header class="header">
-      <div class="brand">
-        <img src="logo.jpg" alt="Logo" class="brand-logo" />
-        <div>
-          <h1 class="brand-title">MyGoals</h1>
-          <p class="current-date" id="currentDate"></p>
+      <div class="header-top">
+        <div class="brand">
+          <img src="logo.jpg" alt="Logo" class="brand-logo" />
+          <div>
+            <h1 class="brand-title">MyGoals</h1>
+            <p class="current-date" id="currentDate"></p>
+          </div>
         </div>
+        <button type="button" class="btn-lock" id="btnLock" title="Lock MyGoals">
+          <span>🔒</span> Lock
+        </button>
       </div>
 
       <!-- Progress Tracker -->

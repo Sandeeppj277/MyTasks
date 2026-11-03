@@ -2,7 +2,7 @@
  * sw.js — Service Worker for MyGoals PWA
  */
 
-const CACHE_NAME = 'mygoals-cache-v1';
+const CACHE_NAME = 'mygoals-cache-v2';
 const ASSETS = [
   './',
   './index.html',

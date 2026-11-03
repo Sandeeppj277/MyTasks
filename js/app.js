@@ -14,7 +14,6 @@
   const authScreen      = document.getElementById('authScreen');
   const appContainer    = document.getElementById('appContainer');
   const authForm        = document.getElementById('authForm');
-  const authUsername    = document.getElementById('authUsername');
   const authPassword    = document.getElementById('authPassword');
   const authError       = document.getElementById('authError');
   const rememberMe      = document.getElementById('rememberMe');

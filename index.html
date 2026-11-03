@@ -22,36 +22,23 @@
     <div class="auth-card">
       <img src="logo.jpg" alt="Logo" class="auth-logo" />
       <h1 class="auth-title">MyGoals</h1>
-      <p class="auth-subtitle">Enter your credentials to access your goals</p>
+      <p class="auth-subtitle">Enter your passcode to access your goals</p>
 
       <form class="auth-form" id="authForm">
         <div class="auth-field">
-          <label for="authUsername" class="auth-label">Username</label>
-          <input
-            type="text"
-            id="authUsername"
-            class="auth-input"
-            placeholder="Enter username"
-            value="sandeep"
-            autocomplete="username"
-            required
-          />
-        </div>
-
-        <div class="auth-field">
-          <label for="authPassword" class="auth-label">Password / PIN</label>
+          <label for="authPassword" class="auth-label">Passcode</label>
           <div class="password-input-wrap">
             <input
               type="password"
               id="authPassword"
               class="auth-input"
-              placeholder="Enter PIN (e.g. 5000)"
+              placeholder="••••"
               pattern="[0-9]*"
               inputmode="numeric"
               autocomplete="current-password"
               required
             />
-            <button type="button" class="btn-toggle-pwd" id="btnTogglePwd" aria-label="Toggle password visibility">👁️</button>
+            <button type="button" class="btn-toggle-pwd" id="btnTogglePwd" aria-label="Toggle passcode visibility">👁️</button>
           </div>
         </div>
 
@@ -64,7 +51,7 @@
         </div>
 
         <div class="auth-error" id="authError" style="display: none;">
-          Incorrect password. Please try again.
+          Incorrect passcode. Please try again.
         </div>
 
         <button type="submit" class="btn-unlock">

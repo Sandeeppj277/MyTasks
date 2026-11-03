@@ -164,6 +164,9 @@ body {
 
 .password-input-wrap .auth-input {
   padding-right: 48px;
+  font-size: 18px;
+  letter-spacing: 3px;
+  text-align: center;
 }
 
 .btn-toggle-pwd {
